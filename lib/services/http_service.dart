@@ -75,10 +75,10 @@ class Network {
   }
 
   /* Http Params */
-  static Map<String, String> paramsPhotos() {
+  static Map<String, String> paramsPhotos(int currentPage) {
     Map<String, String> params = {};
     params.addAll({
-      'page': "1",
+      'page': currentPage.toString(),
       'per_page': '20',
       'order_by': 'popular',
       'client_id': HttpInterceptor.CLIENT_ID
@@ -86,26 +86,26 @@ class Network {
     return params;
   }
 
-  static Map<String, String> paramsSearchPhotos(String query) {
+  static Map<String, String> paramsSearchPhotos(String query ,int currentPage) {
     Map<String, String> params = {};
     params.addAll({
-      'query': query,
-      'page': '1',
+  'query': query,
+      'page': currentPage.toString(),
       'per_page': '20',
       'client_id': HttpInterceptor.CLIENT_ID
     });
     return params;
   }
 
-  static Map<String, String> paramsCollections() {
+  static Map<String, String> paramsCollections(int currentPage) {
     Map<String, String> params = {};
-    params.addAll({'page': '1', 'per_page': '20', 'client_id':HttpInterceptor. CLIENT_ID});
+    params.addAll({'page': currentPage.toString(), 'per_page': '10', 'client_id':HttpInterceptor. CLIENT_ID});
     return params;
   }
 
-  static Map<String, String> paramsCollectionsPhotos() {
+  static Map<String, String> paramsCollectionsPhotos(int  currentPage) {
     Map<String, String> params = {};
-    params.addAll({'page': '1', 'per_page': '20', 'client_id':HttpInterceptor.CLIENT_ID});
+    params.addAll({'page':currentPage.toString(), 'per_page': '20', 'client_id':HttpInterceptor.CLIENT_ID});
     return params;
   }
 

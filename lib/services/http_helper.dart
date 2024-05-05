@@ -17,7 +17,7 @@ class HttpInterceptor implements InterceptorContract {
       // Clear previous header and update it with updated token
       data.headers.clear();
       data.headers['client_id'] = CLIENT_ID;
-      data.headers['Content-type'] = 'application/json; charset=UTF-8';
+      data.headers['Content-type'] = 'application/json';
       LogService.i(data.toString());
     } catch (e) {
       LogService.e(e.toString());

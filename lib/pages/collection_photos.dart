@@ -9,6 +9,7 @@ import '../services/log_service.dart';
 import 'details_page.dart';
 
 class CollectionPhotosPage extends StatefulWidget {
+  static const String id = 'collection_photos_page';
   final Collections? collection;
 
   const CollectionPhotosPage({super.key, this.collection});
@@ -22,6 +23,8 @@ class _CollectionPhotosPageState extends State<CollectionPhotosPage> {
   bool isLoading = true;
   late Collections collection;
   List<CollectionsPhotos> collectionPhotos = [];
+  ScrollController scrollController = ScrollController();
+  int currentPage = 1;
 
   @override
   void initState() {
@@ -29,17 +32,30 @@ class _CollectionPhotosPageState extends State<CollectionPhotosPage> {
     super.initState();
     collection = widget.collection!;
     _apiCollectionPhotos();
+    scrollController.addListener(() {
+      if (scrollController.position.maxScrollExtent <=
+          scrollController.offset) {
+        print('Load next page');
+        currentPage++;
+        _apiCollectionPhotos();
+      }
+    });
   }
 
   _apiCollectionPhotos() async {
-    var response = await Network.GET(
+    try {
+      var response = await Network.GET(
         Network.API_COLLECTIONS_PHOTOS.replaceFirst(':id', collection.id),
-        Network.paramsCollectionsPhotos());
-    LogService.d(response!);
-    setState(() {
-      collectionPhotos = Network.parseCollectionsPhotos(response);
-      isLoading = false;
-    });
+        Network.paramsCollectionsPhotos(currentPage),
+      );
+      setState(() {
+        collectionPhotos.addAll(Network.parseCollectionsPhotos(response!));
+        isLoading = false;
+      });
+      LogService.d(collectionPhotos.length.toString());
+    } catch (e) {
+      LogService.e(e.toString());
+    }
   }
 
   _callDetailsPage(DetailsPhoto photo) {
@@ -67,6 +83,7 @@ class _CollectionPhotosPageState extends State<CollectionPhotosPage> {
 
   Future<void> _handleRefresh() async {
     _apiCollectionPhotos();
+    collectionPhotos.clear();
   }
 
   @override
@@ -83,6 +100,7 @@ class _CollectionPhotosPageState extends State<CollectionPhotosPage> {
             child: Container(
               padding: const EdgeInsets.only(right: 5),
               child: MasonryGridView.count(
+                controller: scrollController,
                 itemCount: collectionPhotos.length,
                 crossAxisCount: 2,
                 itemBuilder: (context, index) {
@@ -134,7 +152,7 @@ class _CollectionPhotosPageState extends State<CollectionPhotosPage> {
             margin: const EdgeInsets.only(top: 5, left: 5),
             child: CachedNetworkImage(
               fit: BoxFit.cover,
-              imageUrl: photos.urls.full,
+              imageUrl: photos.urls.regular,
               placeholder: (context, urls) => Center(
                 child: Container(
                   decoration: BoxDecoration(

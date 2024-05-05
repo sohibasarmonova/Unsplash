@@ -13,6 +13,8 @@ import '../models/details_photo.dart';
 import 'package:iconsax/iconsax.dart';
 
 class DetailsPage extends StatefulWidget {
+  static const String id = 'details_page';
+
   DetailsPhoto? detailsPhoto;
 
   DetailsPage({super.key, this.detailsPhoto});
@@ -49,13 +51,13 @@ class _DetailsPageState extends State<DetailsPage> {
             child: InteractiveViewer(
               minScale: 0.1,
               maxScale: 3,
-              // constrained: true,
+               constrained: true,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: CachedNetworkImage(
                   fit: BoxFit.cover,
-                  imageUrl: detailsPhoto.urls.full,
+                  imageUrl: detailsPhoto.urls.regular,
                 ),
               ),
             ),
@@ -173,6 +175,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                     detailsPhoto.createdAt
                                         .toIso8601String()
                                         .substring(0, 10),
+
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 18),
                                   ),
@@ -217,8 +220,8 @@ class _DetailsPageState extends State<DetailsPage> {
                   children: [
                     //# share button
                     IconButton(
-                      onPressed: ()async {
-                        await Share.share(detailsPhoto.urls.full);
+                      onPressed: (){
+                         share();
                         },
                       icon: Container(
                         height: 50,
@@ -272,6 +275,11 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
   }
+
+  share() async {
+    await Share.share(detailsPhoto.urls.full);
+  }
+
 
   static void _showToast() {
     Fluttertoast.showToast(

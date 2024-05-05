@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:unsplash/services/log_service.dart';
 import '../models/collections.dart';
 import '../services/http_service.dart';
 import 'collection_photos.dart';
 
 
 class CollectionPage extends StatefulWidget {
+  static const String id = 'collection_page';
   const CollectionPage({super.key});
 
   @override
@@ -14,20 +16,38 @@ class CollectionPage extends StatefulWidget {
 
 class _CollectionPageState extends State<CollectionPage> {
   List<Collections> collections = [];
+  ScrollController scrollController = ScrollController();
+  int currentPage = 1;
+
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _apiCollections();
+
+    scrollController.addListener(() {
+      if (scrollController.position.maxScrollExtent <=
+          scrollController.offset) {
+        print('Load next page');
+        currentPage++;
+        _apiCollections();
+      }
+    });
   }
 
+
   _apiCollections() async {
-    var response =
-    await Network.GET(Network.API_COLLECTIONS, Network.paramsCollections());
-    setState(() {
-      collections = Network.parseCollections(response!);
-    });
+    try{
+      var response = await Network.GET(Network.API_COLLECTIONS, Network.paramsCollections(currentPage));
+      setState(() {
+        collections.addAll(Network.parseCollections(response!));
+      });
+      LogService.d(collections.length.toString());
+    } catch (e) {
+      LogService.e(e.toString());
+    }
   }
 
   _callCallPhotosPage(Collections collection){
@@ -43,6 +63,7 @@ class _CollectionPageState extends State<CollectionPage> {
 
   Future<void> _handleRefresh() async {
     _apiCollections();
+    collections.clear();
   }
 
   @override
@@ -58,6 +79,7 @@ class _CollectionPageState extends State<CollectionPage> {
             child: RefreshIndicator(
               onRefresh: _handleRefresh,
               child: ListView.builder(
+                controller: scrollController,
                 itemCount: collections.length,
                 itemBuilder: (context, index) {
                   return _itemOfCollections(collections[index]);
@@ -83,7 +105,7 @@ class _CollectionPageState extends State<CollectionPage> {
           children: [
             CachedNetworkImage(
               fit: BoxFit.cover,
-              imageUrl: collection.coverPhoto.urls.full,
+              imageUrl: collection.coverPhoto.urls.regular,
               placeholder: (context, urls) => Center(
                 child: Container(
                   decoration: BoxDecoration(
